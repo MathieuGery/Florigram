@@ -42,12 +42,13 @@ export default function Home() {
         process.env.NEXT_PUBLIC_API_URL + `/valide`,
         {
           method: 'POST',
-          body: JSON.stringify({'word': word}),
+          body: JSON.stringify({'word': word, 'words': words}),
           headers: { 'Content-Type': 'application/json'}
         }
       );
       const data = await res.json();
       console.log(data)
+      if (data.is_valide) setWords(data.words)
     } catch (err) {
       console.log(err);
     }
