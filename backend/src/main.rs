@@ -58,6 +58,7 @@ async fn valide(day: web::Data<Day>, mut form: web::Json<FormData>) -> impl Resp
     let is_valide;
     if let Some(index) = day.words.get(&form.word.to_uppercase()) {
         is_valide = true;
+        println!("index: {index}");
         form.words[*index] = form.word.clone();
     } else {
         is_valide = false;
@@ -93,6 +94,8 @@ async fn main() -> std::io::Result<()> {
 
     words.resize(8, String::from("empty"));
 
+    words.sort_by(|a, b| a.len().partial_cmp(&b.len()).unwrap());
+
     for word in &words {
         println!("{word}");
     }
@@ -110,7 +113,7 @@ async fn main() -> std::io::Result<()> {
             .service(day_route)
             .service(add)
             .service(valide)
-     }).workers(1).bind(("0.0.0.0", 3000))?
+     }).workers(1).bind(("0.0.0.0", 8080))?
     .run()
     .await
 }

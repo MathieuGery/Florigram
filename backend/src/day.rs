@@ -51,10 +51,10 @@ impl Day {
     }
 
     pub fn get_words_spaces(&self) -> Vec<String> {
-        let mut words = Vec::with_capacity(self.words.len());
+        let mut words = vec![String::new(); self.words.len()];
 
-        for key in self.words.keys() {
-            words.push(to_spaces(&key));
+        for (key, val) in self.words.iter() {
+            words[*val] = to_spaces(&key);
         }
 
         return words;
