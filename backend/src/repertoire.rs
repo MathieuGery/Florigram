@@ -4,8 +4,13 @@ use std::{
     collections::hash_set::HashSet,
 };
 
+pub struct WordWeight {
+    pub word: String,
+    pub weight: f64,
+}
+
 pub struct Repertoire {
-    words: Vec<String>,
+    words: Vec<WordWeight>,
     irs: Vec<u32>,
     letters_bags: Vec<u8>,
     words_map: HashSet<String>,
@@ -43,7 +48,7 @@ fn is_feasible(test :&[u8], against: &[u8]) -> bool {
 
 
 impl ops::Index<usize> for Repertoire {
-    type Output = String;
+    type Output = WordWeight;
 
     fn index(&self, index: usize) -> &Self::Output {
         return &self.words[index];
@@ -53,18 +58,29 @@ impl ops::Index<usize> for Repertoire {
 
 impl Repertoire {
     pub fn new(file: &str) -> Repertoire {
-        let words = lines_from_file(file);
-        let irs : Vec<_> = words.iter().map(|word| get_ir(word)).collect();
+        let lines = lines_from_file(file);
+
+        let mut words = Vec::with_capacity(lines.len());
+
+        for pair in lines {
+            let mut iter = pair.split(';');
+            let word = String::from(iter.next().unwrap());
+            let weight = iter.next().unwrap().parse().unwrap();
+
+            words.push(WordWeight{ word, weight});
+        }
+
+        let irs : Vec<_> = words.iter().map(|word| get_ir(&word.word)).collect();
         let mut letters_bags : Vec<u8> = vec![0; words.len() * 26];
 
         for i in 0..words.len() {
-            get_letters(&words[i], &mut letters_bags[26 * i..26 * (i + 1)])
+            get_letters(&words[i].word, &mut letters_bags[26 * i..26 * (i + 1)])
         }
 
         let mut words_map = HashSet::with_capacity(words.len());
 
         for i in &words {
-            words_map.insert(i.clone());
+            words_map.insert(i.word.clone());
         }
 
         return Repertoire {
@@ -82,7 +98,7 @@ impl Repertoire {
         let letter_count = letters.len();
 
         for i in 0..self.words.len() {
-            if !(!self.irs[i] | letter_ir) == 0 && letter_count >= self.words[i].len() {
+            if !(!self.irs[i] | letter_ir) == 0 && letter_count >= self.words[i].word.len() {
                 ret.push(i);
             }
         }
