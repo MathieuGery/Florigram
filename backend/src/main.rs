@@ -113,7 +113,7 @@ async fn main() -> std::io::Result<()> {
             .service(day_route)
             .service(add)
             .service(valide)
-     }).workers(1).bind(("0.0.0.0", 8080))?
+     }).workers(1).bind(("0.0.0.0", 80))?
     .run()
     .await
 }
