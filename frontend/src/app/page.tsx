@@ -49,6 +49,7 @@ export default function Home() {
       const data = await res.json();
       console.log(data)
       if (data.is_valide) setWords(data.words)
+      else setError('❌ Mauvais Mot !')
     } catch (err) {
       console.log(err);
     }
