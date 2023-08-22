@@ -1,4 +1,6 @@
 use serde::{Serialize, Deserialize};
+use actix_web::{get, HttpResponse, web, Responder};
+use std::sync::atomic::Ordering;
 use std::collections::HashMap;
 use std::sync::atomic::AtomicUsize;
 
@@ -68,9 +70,24 @@ impl Date {
 
 }
 
-//it is possible to change the day through this stuct
-// pub struct TMP {
-//     pub which: AtomicUsize,
-//     pub a: Day,
-//     pub b: Day,
-// }
+#[derive(Serialize)]
+struct DayRep {
+    words: Vec<String>,
+    victories: usize,
+    date: Date,
+    letters: String
+}
+
+#[get("/day")]
+pub async fn day_route(day: web::Data<Day>) -> impl Responder {
+
+    let words = day.get_words_spaces();
+    let rep = DayRep{words,
+        victories: day.victories.load(Ordering::Relaxed),
+        date: day.date.clone(),
+        letters: day.letters.clone()
+    };
+    let res = HttpResponse::Ok().json(rep);
+
+    return res;
+}

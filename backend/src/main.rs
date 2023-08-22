@@ -1,34 +1,12 @@
 mod repertoire;
-mod day;
+mod routes;
 
-use actix_web::{HttpServer, App, Responder, HttpResponse, get, web, post};
-use day::{Date, Day};
+use actix_web::{HttpServer, App, Responder, HttpResponse, get, web};
 use repertoire::Repertoire;
 use std::sync::atomic::Ordering;
-use serde::{Deserialize, Serialize};
 use actix_cors::Cors;
-
-#[derive(Serialize)]
-struct DayRep {
-    words: Vec<String>,
-    victories: usize,
-    date: Date,
-    letters: String
-}
-
-#[get("/day")]
-async fn day_route(day: web::Data<Day>) -> impl Responder {
-
-    let words = day.get_words_spaces();
-    let rep = DayRep{words,
-        victories: day.victories.load(Ordering::Relaxed),
-        date: day.date.clone(),
-        letters: day.letters.clone()
-    };
-    let res = HttpResponse::Ok().json(rep);
-
-    return res;
-}
+use crate::routes::day::{Day, day_route, Date};
+use crate::routes::valide::valide;
 
 #[get("/add")]
 async fn add(day: web::Data<Day>) -> impl Responder {
@@ -39,36 +17,6 @@ async fn add(day: web::Data<Day>) -> impl Responder {
     return res;
 }
 
-#[derive(Deserialize, Debug, Serialize)]
-struct FormData {
-    word: String,
-    words: Vec<String>
-}
-
-#[derive(Deserialize, Serialize)]
-struct ValideRep {
-    words: Vec<String>,
-    is_valide: bool,
-}
-
-#[post("/valide")]
-async fn valide(day: web::Data<Day>, mut form: web::Json<FormData>) -> impl Responder {
-    println!("{:?}", form);
-
-    let is_valide;
-    if let Some(index) = day.words.get(&form.word.to_uppercase()) {
-        is_valide = true;
-        println!("index: {index}");
-        form.words[*index] = form.word.clone();
-    } else {
-        is_valide = false;
-    }
-
-    let rep = ValideRep{words: form.words.clone(), is_valide};
-    let res = HttpResponse::Ok().json(rep);
-
-    return res;
-}
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -113,7 +61,7 @@ async fn main() -> std::io::Result<()> {
             .service(day_route)
             .service(add)
             .service(valide)
-     }).workers(1).bind(("0.0.0.0", 80))?
+     }).workers(1).bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
