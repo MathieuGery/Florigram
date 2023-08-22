@@ -61,11 +61,7 @@ async fn main() -> std::io::Result<()> {
             .service(day_route)
             .service(add)
             .service(valide)
-<<<<<<< HEAD:backend/src/main.rs
      }).workers(1).bind(("0.0.0.0", 8080))?
-=======
-     }).workers(1).bind(("0.0.0.0", 443))?
->>>>>>> a0f7359e3ea6019f3dfc80a964f6b8670b8f7c1a:backend/api/main.rs
     .run()
     .await
 }
